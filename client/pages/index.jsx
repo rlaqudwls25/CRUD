@@ -1,9 +1,12 @@
+import React from 'react';
+import MsgList from '../components/MsgList';
+
 const Home = () => {
-    return (
-        <div>
-            setting
-        </div>
-    );
+  return (
+    <div>
+      <MsgList />
+    </div>
+  );
 };
 
 export default Home;
