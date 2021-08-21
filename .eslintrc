@@ -31,7 +31,7 @@
   "rules": {
     // prettier에 맞게 룰을 설정
     "prettier/prettier": "error",
-    "semi": ["error", "always"],
+    // "semi": ["error", "always"],
     "quotes": ["error", "double"],
     "no-unused-vars": ["off"]
   }
