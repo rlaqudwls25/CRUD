@@ -10,7 +10,8 @@ const msgs = Array(50)
     userId: getRandomUserId(),
     timestamp: 1234567890123 + i * 1000 * 60,
     text: `${i + 1} text mock`,
-  }));
+  }))
+  .reverse();
 
 const MsgList = () => {
   return (
