@@ -15,5 +15,7 @@
   "devDependencies": {
     "eslint": "^7.32.0",
     "prettier": "2.3.2"
-  }
+  },
+  "repository": "https://github.com/rlaqudwls25/api-test.git",
+  "author": "rlaqudwls25 <rlaqudwls157@gmail.com>"
 }
