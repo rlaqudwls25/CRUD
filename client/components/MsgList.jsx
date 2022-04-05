@@ -37,7 +37,7 @@ const MsgList = () => {
       text,
     });
     setMsgs((msgs) => [...msgs, sliceMsg]);
-    doneEdit();
+    // doneEdit();
   };
 
   const onDelete = (id) => {
