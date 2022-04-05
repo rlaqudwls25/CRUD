@@ -3,7 +3,6 @@ import MsgItem from './MsgItem';
 import MsgInput from './MsgInput';
 
 const UserIds = ['jin', 'tom'];
-const getRandomUserId = () => UserIds[Math.round(Math.random())];
 const originalMsgs = Array(50)
   .fill(0)
   .map((_, i) => ({
@@ -14,7 +13,7 @@ const originalMsgs = Array(50)
   }))
   .reverse();
 
-const MsgList = () => {
+const MsgList = observer(() => {
   const [msgs, setMsgs] = useState(originalMsgs);
   const [isEditId, setIsEditId] = useState(null);
 
@@ -25,20 +24,18 @@ const MsgList = () => {
       timestamp: Date.now(),
       text: `${msgs.length + 1} ${text}`,
     };
+
     setMsgs((msgs) => [newmsg, ...msgs]);
   };
 
   const onUpdate = (text, id) => {
-    setMsgs((msgs) => {
-      const targetIdx = msgs.findIndex((msg) => msg.id === id);
-      if (targetIdx < 0) return msgs;
-      const newMsg = [...msgs];
-      newMsg.splice(targetIdx, 1, {
-        ...msgs[targetIdx],
-        text,
-      });
-      return newMsg;
+    const targetIndex = msgs.findIndex((msg) => msg.id === id);
+    if (targetIndex < 0) return msgs;
+    const sliceMsg = msgs.splice(targetIndex, 1, {
+      ...msgs[targetIndex],
+      text,
     });
+    setMsgs((msgs) => [...msgs, sliceMsg]);
     doneEdit();
   };
 
@@ -72,6 +69,6 @@ const MsgList = () => {
       </ul>
     </>
   );
-};
+});
 
 export default MsgList;
