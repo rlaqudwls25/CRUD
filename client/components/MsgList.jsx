@@ -3,6 +3,7 @@ import MsgItem from './MsgItem';
 import MsgInput from './MsgInput';
 
 const UserIds = ['jin', 'tom'];
+const getRandomUserId = () => UserIds[Math.round(Math.random())];
 const originalMsgs = Array(50)
   .fill(0)
   .map((_, i) => ({
@@ -13,7 +14,7 @@ const originalMsgs = Array(50)
   }))
   .reverse();
 
-const MsgList = observer(() => {
+const MsgList = () => {
   const [msgs, setMsgs] = useState(originalMsgs);
   const [isEditId, setIsEditId] = useState(null);
 
@@ -69,6 +70,6 @@ const MsgList = observer(() => {
       </ul>
     </>
   );
-});
+};
 
 export default MsgList;
