@@ -32,22 +32,33 @@ const MsgList = () => {
   const onUpdate = (text, id) => {
     const targetIndex = msgs.findIndex((msg) => msg.id === id);
     if (targetIndex < 0) return msgs;
-    const sliceMsg = msgs.splice(targetIndex, 1, {
+
+    // console.log(
+    //   'msgs',
+    //   msgs.splice(targetIndex, 1, {
+    //     ...msgs[targetIndex],
+    //     text,
+    //   })
+    // );
+
+    const updateMsg = msgs.splice(targetIndex, 1, {
       ...msgs[targetIndex],
       text,
     });
-    setMsgs((msgs) => [...msgs, sliceMsg]);
-    // doneEdit();
+
+    setMsgs((msgs) => [...msgs, updateMsg]);
+
+    doneEdit();
   };
 
   const onDelete = (id) => {
-    setMsgs((msgs) => {
-      const targetIdx = msgs.findIndex((msg) => msg.id === id);
-      if (targetIdx < 0) return msgs;
-      const newMsg = [...msgs];
-      newMsg.splice(targetIdx, 1);
-      return newMsg;
-    });
+    const targetIndex = msgs.findIndex((msg) => msg.id === id);
+
+    if (targetIndex < 0) return msgs;
+
+    const deleteMsg = msgs.splice(targetIndex, 1);
+
+    setMsgs((msgs) => [...msgs, deleteMsg]);
   };
 
   const doneEdit = () => setIsEditId(null);
