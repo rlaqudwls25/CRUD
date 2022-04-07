@@ -4,6 +4,7 @@ import { resolve } from 'path';
 const basePath = resolve(); // 현재 경로
 
 const filenames = {
+  // 해당 DB를 바라본다.
   messages: resolve(basePath, 'src/db/messages.json'),
   users: resolve(basePath, 'src/db/users.json'),
 };
@@ -20,6 +21,7 @@ export const readDB = (target) => {
 
 export const writeDB = (target, data) => {
   try {
+    // data가 들어올 때 JS로 되어있기 때문에 JSON.stringify
     return fs.writeFileSync(filenames[target], JSON.stringify(data));
   } catch (err) {
     console.log('error :', error);
