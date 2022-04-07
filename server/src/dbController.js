@@ -6,7 +6,7 @@ const basePath = resolve();
 const filenames = {
   // 해당 DB를 바라본다.
   messages: resolve(basePath, 'src/db/messages.json'),
-  users: resolve(basePath, 'src/db/users.json'),
+  user: resolve(basePath, 'src/db/user.json'),
 };
 
 // 파일 읽어오기

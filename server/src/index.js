@@ -1,10 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import messagesRoute from './routes/messages.js';
+import userRoute from './routes/user.js';
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json()); //express에서 json형태로 사용하겠다.
+app.use(express.json()); //express에서 json형태로 사용
 
 app.use(
   cors({
@@ -13,7 +14,9 @@ app.use(
   })
 );
 
-messagesRoute.forEach(({ method, route, handler }) => {
+const routes = [...messagesRoute, ...userRoute];
+
+routes.forEach(({ method, route, handler }) => {
   app[method](route, handler);
 });
 
