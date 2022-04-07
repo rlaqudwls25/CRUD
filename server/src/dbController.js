@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { resolve } from 'path';
 
-const basePath = resolve(); // 현재 경로
+const basePath = resolve();
 
 const filenames = {
   // 해당 DB를 바라본다.
@@ -12,7 +12,7 @@ const filenames = {
 // 파일 읽어오기
 export const readDB = (target) => {
   try {
-    // JS문법으로 바꿔주기 위해 JSON.parse
+    // JS로 바꿔주기 위해 JSON.parse
     return JSON.parse(fs.readFileSync(filenames[target], 'utf-8'));
   } catch (error) {
     console.log('error :', error);

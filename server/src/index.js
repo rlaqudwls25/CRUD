@@ -16,7 +16,7 @@ app.use(
 messagesRoute.forEach(({ method, route, handler }) => {
   app[method](route, handler);
 });
+
 app.listen(8000, () => {
-  // 서버가 실제로 띄어지면 콘솔
-  console.log('server listening on 8000...');
+  console.log('server');
 });
