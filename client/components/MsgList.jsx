@@ -33,20 +33,12 @@ const MsgList = () => {
     const targetIndex = msgs.findIndex((msg) => msg.id === id);
     if (targetIndex < 0) return msgs;
 
-    // console.log(
-    //   'msgs',
-    //   msgs.splice(targetIndex, 1, {
-    //     ...msgs[targetIndex],
-    //     text,
-    //   })
-    // );
-
-    const updateMsg = msgs.splice(targetIndex, 1, {
+    msgs.splice(targetIndex, 1, {
       ...msgs[targetIndex],
       text,
     });
 
-    setMsgs((msgs) => [...msgs, updateMsg]);
+    setMsgs((msgs) => [...msgs]);
 
     doneEdit();
   };
@@ -56,9 +48,9 @@ const MsgList = () => {
 
     if (targetIndex < 0) return msgs;
 
-    const deleteMsg = msgs.splice(targetIndex, 1);
+    msgs.splice(targetIndex, 1);
 
-    setMsgs((msgs) => [...msgs, deleteMsg]);
+    setMsgs((msgs) => [...msgs]);
   };
 
   const doneEdit = () => setIsEditId(null);
