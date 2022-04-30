@@ -1,42 +1,49 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 import MsgItem from './MsgItem';
 import MsgInput from './MsgInput';
+import fetcher from '../fetcher';
 
 const UserIds = ['jin', 'tom'];
 const getRandomUserId = () => UserIds[Math.round(Math.random())];
-const originalMsgs = Array(50)
-  .fill(0)
-  .map((_, i) => ({
-    id: i + 1,
-    userId: getRandomUserId(),
-    timestamp: 1234567890123 + i * 1000 * 60,
-    text: `${i + 1} text mock`,
-  }))
-  .reverse();
+// const originalMsgs = Array(50)
+//   .fill(0)
+//   .map((_, i) => ({
+//     id: i + 1,
+//     userId: getRandomUserId(),
+//     timestamp: 1234567890123 + i * 1000 * 60,
+//     text: `${i + 1} text mock`,
+//   }))
+//   .reverse();
 
 const MsgList = () => {
-  const [msgs, setMsgs] = useState(originalMsgs);
+  const [msgs, setMsgs] = useState([]);
   const [isEditId, setIsEditId] = useState(null);
+  const {
+    query: { userId = '' },
+  } = useRouter();
 
-  const onCreate = (text) => {
-    const newmsg = {
-      id: msgs.length + 1,
-      userId: getRandomUserId(),
-      timestamp: Date.now(),
-      text: `${msgs.length + 1} ${text}`,
-    };
+  useEffect(() => {
+    getMessages();
+  }, []);
 
-    setMsgs((msgs) => [newmsg, ...msgs]);
+  const getMessages = async () => {
+    const msgs = await fetcher('get', '/messages');
+    setMsgs(msgs);
   };
 
-  const onUpdate = (text, id) => {
+  const onCreate = async (text) => {
+    const newMsg = await fetcher('post', '/messages', { text, userId });
+    if (!newMsg) throw Error('something wrong');
+    setMsgs((msgs) => [newMsg, ...msgs]);
+  };
+
+  const onUpdate = async (text, id) => {
+    const newmsgs = await fetcher('put', `/messages/${id}`, { text, userId });
     const targetIndex = msgs.findIndex((msg) => msg.id === id);
     if (targetIndex < 0) return msgs;
 
-    msgs.splice(targetIndex, 1, {
-      ...msgs[targetIndex],
-      text,
-    });
+    msgs.splice(targetIndex, 1, newmsgs);
 
     setMsgs((msgs) => [...msgs]);
 
