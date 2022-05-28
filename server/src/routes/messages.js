@@ -2,7 +2,7 @@ import { readDB, writeDB } from '../dbController.js';
 import { v4 } from 'uuid';
 
 const getMsgs = () => readDB('messages');
-const setMsgs = () => writeDB('messages');
+const setMsgs = (data) => writeDB('messages', data);
 
 const messagesRoute = [
   {
@@ -63,13 +63,16 @@ const messagesRoute = [
         if (msgs[targetIndex].userId !== body.userId)
           throw `사용자가 다릅니다.`;
 
-        msgs.splice(targetIndex, 1, {
-          ...msgs[targetIndex],
-          text: body.text,
-        });
+        const newMsg = { ...msgs[targetIndex], text: body.text };
+        msgs.splice(targetIndex, 1, newMsg);
+
+        // msgs.splice(targetIndex, 1, {
+        //   ...msgs[targetIndex],
+        //   text: body.text,
+        // });
 
         setMsgs(msgs);
-        res.send(msgs);
+        res.send(newMsg);
       } catch (error) {
         res.status(500).send({ error: error });
       }

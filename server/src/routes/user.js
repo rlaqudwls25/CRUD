@@ -8,6 +8,7 @@ const userRoute = [
     route: '/user',
     handler: (req, res) => {
       const users = getUsers();
+      console.log('res', res);
       res.send(users);
     },
   },

@@ -1,4 +1,4 @@
 {
-  "jin": { "id": "jin", "name": "진" },
-  "tom": { "id": "tom", "name": "톰" }
+  "jin": { "id": "jin", "nickname": "진" },
+  "tom": { "id": "tom", "nickname": "톰" }
 }

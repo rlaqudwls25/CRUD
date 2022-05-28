@@ -29,23 +29,32 @@ const MsgList = () => {
 
   const getMessages = async () => {
     const msgs = await fetcher('get', '/messages');
+
     setMsgs(msgs);
   };
 
   const onCreate = async (text) => {
     const newMsg = await fetcher('post', '/messages', { text, userId });
+
+    console.log('newMsg', newMsg);
+
     if (!newMsg) throw Error('something wrong');
     setMsgs((msgs) => [newMsg, ...msgs]);
   };
 
   const onUpdate = async (text, id) => {
-    const newmsgs = await fetcher('put', `/messages/${id}`, { text, userId });
+    const newMsg = await fetcher('put', `/messages/${id}`, { text, userId });
+
+    console.log('newmsg', newMsg);
+
     const targetIndex = msgs.findIndex((msg) => msg.id === id);
     if (targetIndex < 0) return msgs;
 
-    msgs.splice(targetIndex, 1, newmsgs);
+    msgs.splice(targetIndex, 1, newMsg);
 
-    setMsgs((msgs) => [...msgs]);
+    console.log(msgs);
+
+    setMsgs(msgs);
 
     doneEdit();
   };
@@ -75,6 +84,7 @@ const MsgList = () => {
               onDelete={() => onDelete(x.id)}
               startEdit={() => setIsEditId(x.id)}
               isEditing={isEditId === x.id}
+              myId={userId}
             />
           ))}
       </ul>
