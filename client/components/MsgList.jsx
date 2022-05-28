@@ -1,42 +1,41 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/router';
 import MsgItem from './MsgItem';
 import MsgInput from './MsgInput';
 import fetcher from '../fetcher';
-
-const UserIds = ['jin', 'tom'];
-const getRandomUserId = () => UserIds[Math.round(Math.random())];
-// const originalMsgs = Array(50)
-//   .fill(0)
-//   .map((_, i) => ({
-//     id: i + 1,
-//     userId: getRandomUserId(),
-//     timestamp: 1234567890123 + i * 1000 * 60,
-//     text: `${i + 1} text mock`,
-//   }))
-//   .reverse();
+import useInfiniteScroll from '../hooks/useInfiniteScroll';
 
 const MsgList = () => {
   const [msgs, setMsgs] = useState([]);
   const [isEditId, setIsEditId] = useState(null);
+  const [next, setNext] = useState(true);
   const {
     query: { userId = '' },
   } = useRouter();
+  const fetchMoreElement = useRef(null);
+  const intersecting = useInfiniteScroll(fetchMoreElement);
 
   useEffect(() => {
-    getMessages();
-  }, []);
+    if (intersecting && next) {
+      getMessages();
+    }
+  }, [intersecting]);
 
   const getMessages = async () => {
-    const msgs = await fetcher('get', '/messages');
+    const newMsgs = await fetcher('get', '/messages', {
+      params: { cursor: msgs[msgs.length - 1]?.id || '' },
+    });
 
-    setMsgs(msgs);
+    if (newMsgs.length === 0) {
+      setNext(false);
+      return;
+    }
+
+    setMsgs((msgs) => [...msgs, ...newMsgs]);
   };
 
   const onCreate = async (text) => {
     const newMsg = await fetcher('post', '/messages', { text, userId });
-
-    console.log('newMsg', newMsg);
 
     if (!newMsg) throw Error('something wrong');
     setMsgs((msgs) => [newMsg, ...msgs]);
@@ -45,22 +44,22 @@ const MsgList = () => {
   const onUpdate = async (text, id) => {
     const newMsg = await fetcher('put', `/messages/${id}`, { text, userId });
 
-    console.log('newmsg', newMsg);
-
     const targetIndex = msgs.findIndex((msg) => msg.id === id);
     if (targetIndex < 0) return msgs;
 
     msgs.splice(targetIndex, 1, newMsg);
 
-    console.log(msgs);
-
-    setMsgs(msgs);
+    setMsgs((msgs) => [...msgs]);
 
     doneEdit();
   };
 
-  const onDelete = (id) => {
-    const targetIndex = msgs.findIndex((msg) => msg.id === id);
+  const onDelete = async (id) => {
+    const deleteId = await fetcher('delete', `/messages/${id}`, {
+      params: { userId },
+    });
+
+    const targetIndex = msgs.findIndex((msg) => msg.id === deleteId + '');
 
     if (targetIndex < 0) return msgs;
 
@@ -88,6 +87,7 @@ const MsgList = () => {
             />
           ))}
       </ul>
+      <div ref={fetchMoreElement} />
     </>
   );
 };
