@@ -6,7 +6,6 @@ import fetcher from '../fetcher';
 import useInfiniteScroll from '../hooks/useInfiniteScroll';
 
 const MsgList = ({ getSMsgs, getUsers }) => {
-  console.log('getUser', getUsers);
   const [msgs, setMsgs] = useState(getSMsgs);
   const [isEditId, setIsEditId] = useState(null);
   const [next, setNext] = useState(true);
