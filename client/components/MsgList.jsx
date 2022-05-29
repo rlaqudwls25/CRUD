@@ -5,8 +5,9 @@ import MsgInput from './MsgInput';
 import fetcher from '../fetcher';
 import useInfiniteScroll from '../hooks/useInfiniteScroll';
 
-const MsgList = () => {
-  const [msgs, setMsgs] = useState([]);
+const MsgList = ({ getSMsgs, getUsers }) => {
+  console.log('getUser', getUsers);
+  const [msgs, setMsgs] = useState(getSMsgs);
   const [isEditId, setIsEditId] = useState(null);
   const [next, setNext] = useState(true);
   const {
@@ -84,6 +85,7 @@ const MsgList = () => {
               startEdit={() => setIsEditId(x.id)}
               isEditing={isEditId === x.id}
               myId={userId}
+              user={getUsers[x.userId]}
             />
           ))}
       </ul>
