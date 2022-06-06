@@ -4,15 +4,22 @@ import MsgItem from './MsgItem';
 import MsgInput from './MsgInput';
 import fetcher from '../fetcher';
 import useInfiniteScroll from '../hooks/useInfiniteScroll';
+import { Message, Users } from '../types/types';
 
-const MsgList = ({ getSMsgs, getUsers }) => {
-  const [msgs, setMsgs] = useState(getSMsgs);
-  const [isEditId, setIsEditId] = useState(null);
+const MsgList = ({
+  getSMsgs,
+  getUsers,
+}: {
+  getSMsgs: Message[];
+  getUsers: Users;
+}) => {
+  const [msgs, setMsgs] = useState<Message[]>(getSMsgs);
+  const [isEditId, setIsEditId] = useState<string | null>(null);
   const [next, setNext] = useState(true);
   const {
     query: { userId = '' },
   } = useRouter();
-  const fetchMoreElement = useRef(null);
+  const fetchMoreElement = useRef<HTMLDivElement>(null);
   const intersecting = useInfiniteScroll(fetchMoreElement);
 
   useEffect(() => {
@@ -34,14 +41,14 @@ const MsgList = ({ getSMsgs, getUsers }) => {
     setMsgs((msgs) => [...msgs, ...newMsgs]);
   };
 
-  const onCreate = async (text) => {
+  const onCreate = async (text: string) => {
     const newMsg = await fetcher('post', '/messages', { text, userId });
 
     if (!newMsg) throw Error('something wrong');
     setMsgs((msgs) => [newMsg, ...msgs]);
   };
 
-  const onUpdate = async (text, id) => {
+  const onUpdate = async (text: string, id?: string) => {
     const newMsg = await fetcher('put', `/messages/${id}`, { text, userId });
 
     const targetIndex = msgs.findIndex((msg) => msg.id === id);
@@ -54,7 +61,7 @@ const MsgList = ({ getSMsgs, getUsers }) => {
     doneEdit();
   };
 
-  const onDelete = async (id) => {
+  const onDelete = async (id: string) => {
     const deleteId = await fetcher('delete', `/messages/${id}`, {
       params: { userId },
     });
