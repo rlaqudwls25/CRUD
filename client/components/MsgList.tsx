@@ -4,7 +4,7 @@ import MsgItem from './MsgItem'
 import MsgInput from './MsgInput'
 import fetcher from '../fetcher'
 import useInfiniteScroll from '../hooks/useInfiniteScroll'
-import { Message, Users } from '../types/types'
+import { Message, Users, METHOD } from '../types/types'
 
 const MsgList = ({
   getSMsgs,
@@ -17,7 +17,7 @@ const MsgList = ({
   const [isEditId, setIsEditId] = useState<string | null>(null)
   const [next, setNext] = useState(true)
   const {
-    query: { userId = '', userid = '' },
+    query: { userId = '' },
   } = useRouter()
   const fetchMoreElement = useRef<HTMLDivElement>(null)
   const intersecting = useInfiniteScroll(fetchMoreElement)
@@ -29,7 +29,7 @@ const MsgList = ({
   }, [intersecting])
 
   const getMessages = async () => {
-    const newMsgs = await fetcher('get', '/messages', {
+    const newMsgs = await fetcher(METHOD.GET, '/messages', {
       params: { cursor: msgs[msgs.length - 1]?.id || '' },
     })
 
@@ -42,14 +42,21 @@ const MsgList = ({
   }
 
   const onCreate = async (text: string) => {
-    const newMsg = await fetcher('post', '/messages', { text, userId })
+    const newMsg = await fetcher(METHOD.POST, '/messages', { text, userId })
+
+    console.log('create', newMsg)
 
     if (!newMsg) throw Error('something wrong')
     setMsgs((msgs) => [newMsg, ...msgs])
   }
 
   const onUpdate = async (text: string, id?: string) => {
-    const newMsg = await fetcher('put', `/messages/${id}`, { text, userId })
+    const newMsg = await fetcher(METHOD.PUT, `/messages/${id}`, {
+      text,
+      userId,
+    })
+
+    console.log('newMsg', newMsg)
 
     const targetIndex = msgs.findIndex((msg) => msg.id === id)
     if (targetIndex < 0) return msgs
@@ -62,7 +69,7 @@ const MsgList = ({
   }
 
   const onDelete = async (id: string) => {
-    const deleteId = await fetcher('delete', `/messages/${id}`, {
+    const deleteId = await fetcher(METHOD.DELETE, `/messages/${id}`, {
       params: { userId },
     })
 
