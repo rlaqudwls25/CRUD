@@ -23,7 +23,6 @@ const MsgItem = ({
   onDelete: () => void
   startEdit: () => void
 }) => {
-  console.log('myId', typeof myId)
   return (
     <li className="messages__item">
       <h3>
