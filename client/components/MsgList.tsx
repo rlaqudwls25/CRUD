@@ -1,81 +1,81 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useRouter } from 'next/router';
-import MsgItem from './MsgItem';
-import MsgInput from './MsgInput';
-import fetcher from '../fetcher';
-import useInfiniteScroll from '../hooks/useInfiniteScroll';
-import { Message, Users } from '../types/types';
+import React, { useEffect, useState, useRef } from 'react'
+import { useRouter } from 'next/router'
+import MsgItem from './MsgItem'
+import MsgInput from './MsgInput'
+import fetcher from '../fetcher'
+import useInfiniteScroll from '../hooks/useInfiniteScroll'
+import { Message, Users } from '../types/types'
 
 const MsgList = ({
   getSMsgs,
   getUsers,
 }: {
-  getSMsgs: Message[];
-  getUsers: Users;
+  getSMsgs: Message[]
+  getUsers: Users
 }) => {
-  const [msgs, setMsgs] = useState<Message[]>(getSMsgs);
-  const [isEditId, setIsEditId] = useState<string | null>(null);
-  const [next, setNext] = useState(true);
+  const [msgs, setMsgs] = useState<Message[]>(getSMsgs)
+  const [isEditId, setIsEditId] = useState<string | null>(null)
+  const [next, setNext] = useState(true)
   const {
-    query: { userId = '' },
-  } = useRouter();
-  const fetchMoreElement = useRef<HTMLDivElement>(null);
-  const intersecting = useInfiniteScroll(fetchMoreElement);
+    query: { userId = '', userid = '' },
+  } = useRouter()
+  const fetchMoreElement = useRef<HTMLDivElement>(null)
+  const intersecting = useInfiniteScroll(fetchMoreElement)
 
   useEffect(() => {
     if (intersecting && next) {
-      getMessages();
+      getMessages()
     }
-  }, [intersecting]);
+  }, [intersecting])
 
   const getMessages = async () => {
     const newMsgs = await fetcher('get', '/messages', {
       params: { cursor: msgs[msgs.length - 1]?.id || '' },
-    });
+    })
 
     if (newMsgs.length === 0) {
-      setNext(false);
-      return;
+      setNext(false)
+      return
     }
 
-    setMsgs((msgs) => [...msgs, ...newMsgs]);
-  };
+    setMsgs((msgs) => [...msgs, ...newMsgs])
+  }
 
   const onCreate = async (text: string) => {
-    const newMsg = await fetcher('post', '/messages', { text, userId });
+    const newMsg = await fetcher('post', '/messages', { text, userId })
 
-    if (!newMsg) throw Error('something wrong');
-    setMsgs((msgs) => [newMsg, ...msgs]);
-  };
+    if (!newMsg) throw Error('something wrong')
+    setMsgs((msgs) => [newMsg, ...msgs])
+  }
 
   const onUpdate = async (text: string, id?: string) => {
-    const newMsg = await fetcher('put', `/messages/${id}`, { text, userId });
+    const newMsg = await fetcher('put', `/messages/${id}`, { text, userId })
 
-    const targetIndex = msgs.findIndex((msg) => msg.id === id);
-    if (targetIndex < 0) return msgs;
+    const targetIndex = msgs.findIndex((msg) => msg.id === id)
+    if (targetIndex < 0) return msgs
 
-    msgs.splice(targetIndex, 1, newMsg);
+    msgs.splice(targetIndex, 1, newMsg)
 
-    setMsgs((msgs) => [...msgs]);
+    setMsgs((msgs) => [...msgs])
 
-    doneEdit();
-  };
+    doneEdit()
+  }
 
   const onDelete = async (id: string) => {
     const deleteId = await fetcher('delete', `/messages/${id}`, {
       params: { userId },
-    });
+    })
 
-    const targetIndex = msgs.findIndex((msg) => msg.id === deleteId + '');
+    const targetIndex = msgs.findIndex((msg) => msg.id === deleteId + '')
 
-    if (targetIndex < 0) return msgs;
+    if (targetIndex < 0) return msgs
 
-    msgs.splice(targetIndex, 1);
+    msgs.splice(targetIndex, 1)
 
-    setMsgs((msgs) => [...msgs]);
-  };
+    setMsgs((msgs) => [...msgs])
+  }
 
-  const doneEdit = () => setIsEditId(null);
+  const doneEdit = () => setIsEditId(null)
 
   return (
     <>
@@ -97,7 +97,7 @@ const MsgList = ({
       </ul>
       <div ref={fetchMoreElement} />
     </>
-  );
-};
+  )
+}
 
-export default MsgList;
+export default MsgList

@@ -1,9 +1,9 @@
-import React from 'react';
-import MsgInput from './MsgInput';
+import React from 'react'
+import MsgInput from './MsgInput'
+import { User } from '../types/types'
 
 const MsgItem = ({
   id,
-  userId,
   timestamp,
   text,
   isEditing,
@@ -12,7 +12,18 @@ const MsgItem = ({
   startEdit,
   myId,
   user,
+}: {
+  id: string
+  timestamp: number
+  text: string
+  myId: string | string[]
+  user: User
+  isEditing: boolean
+  onUpdate: (id: string, text?: string) => void
+  onDelete: () => void
+  startEdit: () => void
 }) => {
+  console.log('myId', typeof myId)
   return (
     <li className="messages__item">
       <h3>
@@ -35,14 +46,14 @@ const MsgItem = ({
       ) : (
         text
       )}
-      {myId === userId && (
+      {myId === user.id && (
         <div className="messages__buttons">
           <button onClick={startEdit}>수정</button>
           <button onClick={onDelete}>삭제</button>
         </div>
       )}
     </li>
-  );
-};
+  )
+}
 
-export default MsgItem;
+export default MsgItem
