@@ -44,8 +44,6 @@ const MsgList = ({
   const onCreate = async (text: string) => {
     const newMsg = await fetcher(METHOD.POST, '/messages', { text, userId })
 
-    console.log('create', newMsg)
-
     if (!newMsg) throw Error('something wrong')
     setMsgs((msgs) => [newMsg, ...msgs])
   }
@@ -55,8 +53,6 @@ const MsgList = ({
       text,
       userId,
     })
-
-    console.log('newMsg', newMsg)
 
     const targetIndex = msgs.findIndex((msg) => msg.id === id)
     if (targetIndex < 0) return msgs

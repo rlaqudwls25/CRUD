@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef, useCallback, RefObject } from 'react'
 
 const useInfiniteScroll = (targetEl: RefObject<HTMLElement>) => {
-  console.log('targetEl', typeof targetEl)
   const observerRef = useRef<IntersectionObserver>()
   const [intersecting, setIntersecting] = useState(false)
 
