@@ -14,6 +14,7 @@
 * React.js
 * Next.js
 * Axios
+* TypeScript
 
 ### Back
 * Nodejs
@@ -39,7 +40,6 @@
 
 
 ## 4. 추가 작업 해야 할 부분
-* TypeScript 적용
 * Recoil로 상태관리 하기
 
 
