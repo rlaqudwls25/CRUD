@@ -5,11 +5,7 @@ import MsgInput from './MsgInput'
 import fetcher from '../fetcher'
 import useInfiniteScroll from '../hooks/useInfiniteScroll'
 import { Message, Users, METHOD } from '../types/types'
-import { Audio } from 'react-loader-spinner'
-
-// interface Props {
-//   Loader: React.ElementType
-// }
+import Loading from './Loading'
 
 const MsgList = ({
   getSMsgs,
@@ -17,55 +13,63 @@ const MsgList = ({
 }: {
   getSMsgs: Message[]
   getUsers: Users
-}) =>
-  // props: Props
-  {
-    const [msgs, setMsgs] = useState<Message[]>(getSMsgs)
-    const [isEditId, setIsEditId] = useState<string | null>(null)
-    const [next, setNext] = useState(true)
-    const {
-      query: { userId = '' },
-    } = useRouter()
-    const fetchMoreElement = useRef<HTMLDivElement>(null)
-    const intersecting = useInfiniteScroll(fetchMoreElement)
-    const [loading, setLoading] = useState<boolean>(false)
+}) => {
+  const [msgs, setMsgs] = useState<Message[]>(getSMsgs)
+  const [isEditId, setIsEditId] = useState<string | null>(null)
+  const [next, setNext] = useState(true)
+  const {
+    query: { userId = '' },
+  } = useRouter()
+  const fetchMoreElement = useRef<HTMLDivElement>(null)
+  const intersecting = useInfiniteScroll(fetchMoreElement)
+  const [loading, setLoading] = useState<boolean>(false)
 
-    // const { loader: Loader } = props
-
-    useEffect(() => {
-      // setLoading(true)
-      if (intersecting && next) {
-        getMessages()
-      }
-    }, [intersecting])
-
-    const getMessages = async () => {
-      try {
-        // setLoading(true)
-        const newMsgs = await fetcher(METHOD.GET, '/messages', {
-          params: { cursor: msgs[msgs.length - 1]?.id || '' },
-        })
-
-        if (newMsgs.length === 0) {
-          setNext(false)
-          return
-        }
-
-        setMsgs((msgs) => [...msgs, ...newMsgs])
-      } catch (error) {
-        // setLoading(false)
-        console.error(error)
-      }
+  useEffect(() => {
+    if (intersecting && next) {
+      getMessages()
     }
+  }, [intersecting])
 
-    const onCreate = async (text: string) => {
+  const getMessages = async (): Promise<void> => {
+    try {
+      setLoading(true)
+      const newMsgs = await fetcher(METHOD.GET, '/messages', {
+        params: { cursor: msgs[msgs.length - 1]?.id || '' },
+      })
+
+      if (newMsgs.length === 0) {
+        setNext(false)
+        return
+      }
+
+      setMsgs((msgs) => [...msgs, ...newMsgs])
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const onCreate = async (text: string): Promise<void> => {
+    try {
+      setLoading(true)
       const newMsg = await fetcher(METHOD.POST, '/messages', { text, userId })
 
       if (!newMsg) throw Error('something wrong')
       setMsgs((msgs) => [newMsg, ...msgs])
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setLoading(false)
     }
+  }
 
-    const onUpdate = async (text: string, id?: string) => {
+  const onUpdate = async (
+    text: string,
+    id?: string
+  ): Promise<Message[] | undefined> => {
+    try {
+      setLoading(true)
       const newMsg = await fetcher(METHOD.PUT, `/messages/${id}`, {
         text,
         userId,
@@ -79,9 +83,16 @@ const MsgList = ({
       setMsgs((msgs) => [...msgs])
 
       doneEdit()
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setLoading(false)
     }
+  }
 
-    const onDelete = async (id: string) => {
+  const onDelete = async (id: string): Promise<Message[] | undefined> => {
+    try {
+      setLoading(true)
       const deleteId = await fetcher(METHOD.DELETE, `/messages/${id}`, {
         params: { userId },
       })
@@ -93,39 +104,42 @@ const MsgList = ({
       msgs.splice(targetIndex, 1)
 
       setMsgs((msgs) => [...msgs])
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setLoading(false)
     }
-
-    const doneEdit = () => setIsEditId(null)
-
-    return (
-      <>
-        <MsgInput mutate={onCreate} />
-        {loading ? (
-          <div>
-            <Audio color="#262626" height={40} width={40} />
-          </div>
-        ) : (
-          <>
-            <ul className="messages">
-              {msgs &&
-                msgs.map((x) => (
-                  <MsgItem
-                    key={x.id}
-                    {...x}
-                    onUpdate={onUpdate}
-                    onDelete={() => onDelete(x.id)}
-                    startEdit={() => setIsEditId(x.id)}
-                    isEditing={isEditId === x.id}
-                    myId={userId}
-                    user={getUsers[x.userId]}
-                  />
-                ))}
-            </ul>
-            <div ref={fetchMoreElement} />
-          </>
-        )}
-      </>
-    )
   }
+
+  const doneEdit = () => setIsEditId(null)
+
+  return (
+    <>
+      <MsgInput mutate={onCreate} />
+      {loading ? (
+        <Loading />
+      ) : (
+        <>
+          <ul className="messages">
+            {msgs &&
+              msgs.map((x) => (
+                <MsgItem
+                  key={x.id}
+                  {...x}
+                  onUpdate={onUpdate}
+                  onDelete={() => onDelete(x.id)}
+                  startEdit={() => setIsEditId(x.id)}
+                  isEditing={isEditId === x.id}
+                  myId={userId}
+                  user={getUsers[x.userId]}
+                />
+              ))}
+          </ul>
+          <div ref={fetchMoreElement} />
+        </>
+      )}
+    </>
+  )
+}
 
 export default MsgList
