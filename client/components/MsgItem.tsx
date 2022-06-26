@@ -1,6 +1,7 @@
 import React from 'react'
 import MsgInput from './MsgInput'
 import { User } from '../types/types'
+import Button from './button'
 
 const MsgItem = ({
   id,
@@ -47,8 +48,12 @@ const MsgItem = ({
       )}
       {myId === user.id && (
         <div className="messages__buttons">
-          <button onClick={startEdit}>수정</button>
-          <button onClick={onDelete}>삭제</button>
+          <Button className="update" onClick={startEdit}>
+            수정
+          </Button>
+          <Button className="delete" onClick={onDelete}>
+            삭제
+          </Button>
         </div>
       )}
     </li>

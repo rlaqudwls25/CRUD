@@ -1,10 +1,11 @@
 import React from 'react'
-import { Audio } from 'react-loader-spinner'
+import { Oval } from 'react-loader-spinner'
+// import './Loading.scss'
 
 const Loading = () => {
   return (
-    <div>
-      <Audio color="#262626" height={40} width={40} />
+    <div className="loading-box">
+      <Oval height={40} width={40} />
     </div>
   )
 }

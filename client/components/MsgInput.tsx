@@ -1,4 +1,5 @@
 import React, { FormEvent, useRef } from 'react'
+import Button from './button'
 
 const MsgInput = ({
   mutate,
@@ -24,7 +25,7 @@ const MsgInput = ({
   return (
     <form className="messages__input" onSubmit={onSubmit}>
       <textarea ref={textRef} defaultValue={text} />
-      <button type="submit">완료</button>
+      <Button type="submit">등록</Button>
     </form>
   )
 }

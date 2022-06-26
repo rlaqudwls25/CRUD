@@ -8,6 +8,11 @@ h1 {
   text-align: center;
   margin: 20px 0;
 }
+
+button {
+  border: none;
+  cursor: pointer;
+}
 .messages {
   list-style: none;
   padding: 0;
@@ -26,8 +31,15 @@ h1 {
       flex-grow: 1;
     }
     button {
-      margin-left: 5px;
       width: 60px;
+      margin-left: 5px;
+      background: #f4f8ff;
+      color: #0040d1;
+      border-radius: 4px;
+      &:hover {
+        background: #0040d1;
+        color: #f4f8ff;
+      }
     }
   }
   &__item {
@@ -61,5 +73,23 @@ h1 {
     text-align: right;
     right: 10px;
     bottom: 10px;
+
+    .update {
+      background-color: #f4f8ff;
+    }
+
+    .delete {
+      background-color: #fff1f1;
+    }
+  }
+}
+.loading-box {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  svg {
+    stroke: white;
   }
 }
