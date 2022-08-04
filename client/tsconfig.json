@@ -16,6 +16,6 @@
     "strict": true,
     "incremental": true
   },
-  "include": ["**/*.ts", "**/*.tsx", "components/Loading.tsx"],
+  "include": ["**/*.ts", "**/*.tsx", "components/Loading.tsx", "pages/_app.js"],
   "exclude": ["node_modules"]
 }
