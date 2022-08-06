@@ -2,8 +2,8 @@ import React, { useEffect, useState, useRef } from 'react'
 import { Message, Users, METHOD } from '../types/types'
 import { useRouter } from 'next/router'
 import { fetcher, QueryKeys } from '../fetcher'
-import { useQuery } from '@tanstack/react-query'
-import { GET_MESSAGES } from '../graphql/messages'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { CREATE_MESSAGE, GET_MESSAGES } from '../graphql/messages'
 import MsgItem from './MsgItem'
 import MsgInput from './MsgInput'
 import Loading from './Loading'
@@ -19,8 +19,7 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
   // const fetchMoreElement = useRef<HTMLDivElement>(null)
   // const intersecting = useInfiniteScroll(fetchMoreElement)
   const [loading, setLoading] = useState<boolean>(false)
-
-  console.log('users', users)
+  const client = useQueryClient()
 
   // useEffect(() => {
   //   if (intersecting && next) {
@@ -32,7 +31,7 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
   //   getMessages()
   // }, [])
 
-  const { data, error, isError } = useQuery(QueryKeys.MESSAGES, () =>
+  const { data, error, isError } = useQuery('MESSAGE', () =>
     fetcher(GET_MESSAGES)
   )
 
@@ -62,19 +61,32 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
     }
   }
 
-  const onCreate = async (text: string): Promise<void> => {
-    try {
-      setLoading(true)
-      const newMsg = await fetcher(METHOD.POST, '/messages', { text, userId })
-
-      if (!newMsg) throw Error('something wrong')
-      setMsgs((msgs) => [newMsg, ...msgs])
-    } catch (error) {
-      console.error(error)
-    } finally {
-      setLoading(false)
+  const { mutate: onCreate } = useMutation(
+    ({ text }: { text: string }) => fetcher(CREATE_MESSAGE, { text, userId }),
+    {
+      onSuccess: ({ createMessage }) => {
+        client.setQueriesData(QueryKeys.MESSAGES, (old: { messages: any }) => {
+          return {
+            messages: [...old.messages, createMessage],
+          }
+        })
+      },
     }
-  }
+  )
+
+  // const onCreate = async (text: string): Promise<void> => {
+  //   try {
+  //     setLoading(true)
+  //     const newMsg = await fetcher(METHOD.POST, '/messages', { text, userId })
+
+  //     if (!newMsg) throw Error('something wrong')
+  //     setMsgs((msgs) => [newMsg, ...msgs])
+  //   } catch (error) {
+  //     console.error(error)
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
 
   const onUpdate = async (
     text: string,
@@ -135,7 +147,6 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
           <ul className="messages">
             {msgs &&
               msgs.map((x) => (
-                // console.log('x', x)
                 <MsgItem
                   key={x.id}
                   {...x}

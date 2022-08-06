@@ -1,20 +1,13 @@
 // import axios from 'axios'
 // import { METHOD } from './types/types'
-import { DocumentNode } from 'graphql'
+import { DocumentNode } from 'graphql/language/ast'
 import { request } from 'graphql-request'
-const baseURL = 'http://localhost:8000/graphql'
-
-// interface Key {
-//   MESSAGES: any | unknown
-//   MESSAGE: string
-//   USERS: string
-//   USER: string
-// }
+const URL = 'http://localhost:8000/graphql'
 
 export const fetcher = (
   query: DocumentNode,
   variables: { [key: string]: any } = {}
-) => request(baseURL, query, variables)
+) => request(URL, query, variables)
 
 export const QueryKeys = {
   MESSAGES: 'MESSAGES',
