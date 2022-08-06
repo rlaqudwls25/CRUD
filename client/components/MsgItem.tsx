@@ -1,7 +1,7 @@
 import React from 'react'
 import MsgInput from './MsgInput'
 import { User } from '../types/types'
-import Button from './button'
+import Button from './Button'
 
 const MsgItem = ({
   id,
@@ -27,7 +27,7 @@ const MsgItem = ({
   return (
     <li className="messages__item">
       <h3>
-        {user.nickname}{' '}
+        {user?.nickname}{' '}
         <sub>
           {new Date(timestamp).toLocaleString('ko-KR', {
             year: 'numeric',
@@ -46,7 +46,7 @@ const MsgItem = ({
       ) : (
         text
       )}
-      {myId === user.id && (
+      {myId === user?.id && (
         <div className="messages__buttons">
           <Button className="update" onClick={startEdit}>
             수정

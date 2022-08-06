@@ -1,34 +1,46 @@
 import React, { useEffect, useState, useRef } from 'react'
+import { Message, Users, METHOD } from '../types/types'
 import { useRouter } from 'next/router'
+import { fetcher, QueryKeys } from '../fetcher'
+import { useQuery } from '@tanstack/react-query'
+import { GET_MESSAGES } from '../graphql/messages'
 import MsgItem from './MsgItem'
 import MsgInput from './MsgInput'
-import fetcher from '../fetcher'
-import useInfiniteScroll from '../hooks/useInfiniteScroll'
-import { Message, Users, METHOD } from '../types/types'
 import Loading from './Loading'
+// import useInfiniteScroll from '../hooks/useInfiniteScroll'
 
-const MsgList = ({
-  getSMsgs,
-  getUsers,
-}: {
-  getSMsgs: Message[]
-  getUsers: Users
-}) => {
-  const [msgs, setMsgs] = useState<Message[]>(getSMsgs)
+const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
+  const [msgs, setMsgs] = useState<Message[]>(smsgs)
   const [isEditId, setIsEditId] = useState<string | null>(null)
-  const [next, setNext] = useState(true)
+  // const [next, setNext] = useState(true)
   const {
     query: { userId = '' },
   } = useRouter()
-  const fetchMoreElement = useRef<HTMLDivElement>(null)
-  const intersecting = useInfiniteScroll(fetchMoreElement)
+  // const fetchMoreElement = useRef<HTMLDivElement>(null)
+  // const intersecting = useInfiniteScroll(fetchMoreElement)
   const [loading, setLoading] = useState<boolean>(false)
 
-  useEffect(() => {
-    if (intersecting && next) {
-      getMessages()
-    }
-  }, [intersecting])
+  console.log('users', users)
+
+  // useEffect(() => {
+  //   if (intersecting && next) {
+  //     getMessages()
+  //   }
+  // }, [intersecting])
+
+  // useEffect(() => {
+  //   getMessages()
+  // }, [])
+
+  const { data, error, isError } = useQuery(QueryKeys.MESSAGES, () =>
+    fetcher(GET_MESSAGES)
+  )
+
+  console.log('data', data)
+
+  if (isError) {
+    return null
+  }
 
   const getMessages = async (): Promise<void> => {
     try {
@@ -123,6 +135,7 @@ const MsgList = ({
           <ul className="messages">
             {msgs &&
               msgs.map((x) => (
+                // console.log('x', x)
                 <MsgItem
                   key={x.id}
                   {...x}
@@ -131,11 +144,11 @@ const MsgList = ({
                   startEdit={() => setIsEditId(x.id)}
                   isEditing={isEditId === x.id}
                   myId={userId}
-                  user={getUsers[x.userId]}
+                  user={users.find((user: any) => user.id === x.userId)}
                 />
               ))}
           </ul>
-          <div ref={fetchMoreElement} />
+          {/* <div ref={fetchMoreElement} /> */}
         </>
       )}
     </>

@@ -8,8 +8,8 @@ const messageSchema = gql`
     timestamp: Float #13자리 숫자
   }
   extend type Query {
-    messages: [Message!]! # getMessages
-    message(id: ID!): Message! # getMessage
+    messages: [Message!]!
+    message(id: ID!): Message!
   }
   extend type Mutation {
     createMessage(text: String!, userId: ID!): Message!
