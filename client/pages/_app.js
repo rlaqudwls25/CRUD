@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useRef } from 'react'
+import { Hydrate } from '@tanstack/react-query'
 import './index.scss'
 
 const App = ({ Component, pageProps }) => {
@@ -13,7 +14,10 @@ const App = ({ Component, pageProps }) => {
   }
   return (
     <QueryClientProvider client={getClient()}>
-      <Component {...pageProps} />
+      <Hydrate state={pageProps.dehydratedState}>
+        {/* server side 에서 받아온 property를 data가 없고 html만 남아있는 */}
+        <Component {...pageProps} />
+      </Hydrate>
     </QueryClientProvider>
   )
 }

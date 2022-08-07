@@ -31,41 +31,43 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
   //   getMessages()
   // }, [])
 
-  const { data, error, isError } = useQuery('MESSAGE', () =>
+  const { data, error, isError } = useQuery([QueryKeys.MESSAGE], () =>
     fetcher(GET_MESSAGES)
   )
 
-  console.log('data', data)
+  useEffect(() => {
+    setMsgs(data?.messages || [])
+  }, [data?.messages])
 
-  if (isError) {
-    return null
-  }
+  // if (isError) {
+  //   return null
+  // }
 
-  const getMessages = async (): Promise<void> => {
-    try {
-      setLoading(true)
-      const newMsgs = await fetcher(METHOD.GET, '/messages', {
-        params: { cursor: msgs[msgs.length - 1]?.id || '' },
-      })
+  // const getMessages = async (): Promise<void> => {
+  //   try {
+  //     setLoading(true)
+  //     const newMsgs = await fetcher(METHOD.GET, '/messages', {
+  //       params: { cursor: msgs[msgs.length - 1]?.id || '' },
+  //     })
 
-      if (newMsgs.length === 0) {
-        setNext(false)
-        return
-      }
+  //     if (newMsgs.length === 0) {
+  //       setNext(false)
+  //       return
+  //     }
 
-      setMsgs((msgs) => [...msgs, ...newMsgs])
-    } catch (error) {
-      console.error(error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  //     setMsgs((msgs) => [...msgs, ...newMsgs])
+  //   } catch (error) {
+  //     console.error(error)
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
 
   const { mutate: onCreate } = useMutation(
     ({ text }: { text: string }) => fetcher(CREATE_MESSAGE, { text, userId }),
     {
       onSuccess: ({ createMessage }) => {
-        client.setQueriesData(QueryKeys.MESSAGES, (old: { messages: any }) => {
+        client.setQueriesData([QueryKeys.MESSAGES], (old: any) => {
           return {
             messages: [...old.messages, createMessage],
           }
@@ -88,52 +90,52 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
   //   }
   // }
 
-  const onUpdate = async (
-    text: string,
-    id?: string
-  ): Promise<Message[] | undefined> => {
-    try {
-      setLoading(true)
-      const newMsg = await fetcher(METHOD.PUT, `/messages/${id}`, {
-        text,
-        userId,
-      })
+  // const onUpdate = async (
+  //   text: string,
+  //   id?: string
+  // ): Promise<Message[] | undefined> => {
+  //   try {
+  //     setLoading(true)
+  //     const newMsg = await fetcher(METHOD.PUT, `/messages/${id}`, {
+  //       text,
+  //       userId,
+  //     })
 
-      const targetIndex = msgs.findIndex((msg) => msg.id === id)
-      if (targetIndex < 0) return msgs
+  //     const targetIndex = msgs.findIndex((msg) => msg.id === id)
+  //     if (targetIndex < 0) return msgs
 
-      msgs.splice(targetIndex, 1, newMsg)
+  //     msgs.splice(targetIndex, 1, newMsg)
 
-      setMsgs((msgs) => [...msgs])
+  //     setMsgs((msgs) => [...msgs])
 
-      doneEdit()
-    } catch (error) {
-      console.error(error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  //     doneEdit()
+  //   } catch (error) {
+  //     console.error(error)
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
 
-  const onDelete = async (id: string): Promise<Message[] | undefined> => {
-    try {
-      setLoading(true)
-      const deleteId = await fetcher(METHOD.DELETE, `/messages/${id}`, {
-        params: { userId },
-      })
+  // const onDelete = async (id: string): Promise<Message[] | undefined> => {
+  //   try {
+  //     setLoading(true)
+  //     const deleteId = await fetcher(METHOD.DELETE, `/messages/${id}`, {
+  //       params: { userId },
+  //     })
 
-      const targetIndex = msgs.findIndex((msg) => msg.id === deleteId + '')
+  //     const targetIndex = msgs.findIndex((msg) => msg.id === deleteId + '')
 
-      if (targetIndex < 0) return msgs
+  //     if (targetIndex < 0) return msgs
 
-      msgs.splice(targetIndex, 1)
+  //     msgs.splice(targetIndex, 1)
 
-      setMsgs((msgs) => [...msgs])
-    } catch (error) {
-      console.error(error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  //     setMsgs((msgs) => [...msgs])
+  //   } catch (error) {
+  //     console.error(error)
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
 
   const doneEdit = () => setIsEditId(null)
 
@@ -150,8 +152,8 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
                 <MsgItem
                   key={x.id}
                   {...x}
-                  onUpdate={onUpdate}
-                  onDelete={() => onDelete(x.id)}
+                  // onUpdate={onUpdate}
+                  // onDelete={() => onDelete(x.id)}
                   startEdit={() => setIsEditId(x.id)}
                   isEditing={isEditId === x.id}
                   myId={userId}

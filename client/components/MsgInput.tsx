@@ -1,12 +1,12 @@
 import React, { FormEvent, useRef } from 'react'
-import Button from './button'
+import Button from './Button'
 
 const MsgInput = ({
   mutate,
   id = undefined,
   text,
 }: {
-  mutate: (text: string, id?: string) => void
+  mutate: ({ text, id }: { text: string; id?: string }) => void
   id?: string
   text?: string
 }) => {
@@ -19,7 +19,7 @@ const MsgInput = ({
     const text = textRef.current.value
 
     textRef.current.value = ''
-    mutate(text, id)
+    mutate({ text, id })
   }
 
   return (
