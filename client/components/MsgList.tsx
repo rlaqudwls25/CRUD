@@ -31,12 +31,13 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
   //   getMessages()
   // }, [])
 
-  const { data, error, isError } = useQuery([QueryKeys.MESSAGE], () =>
+  const { data, error, isError } = useQuery([QueryKeys.MESSAGES], () =>
     fetcher(GET_MESSAGES)
   )
 
   useEffect(() => {
-    setMsgs(data?.messages || [])
+    if (!data?.messages) return
+    setMsgs(data?.messages)
   }, [data?.messages])
 
   // if (isError) {
@@ -69,7 +70,7 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
       onSuccess: ({ createMessage }) => {
         client.setQueriesData([QueryKeys.MESSAGES], (old: any) => {
           return {
-            messages: [...old.messages, createMessage],
+            messages: [createMessage, ...old.messages],
           }
         })
       },
