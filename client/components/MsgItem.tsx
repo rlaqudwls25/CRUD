@@ -20,7 +20,7 @@ const MsgItem = ({
   myId: string | string[]
   user: User
   isEditing: boolean
-  onUpdate?: ({ id, text }: { id: string; text?: string }) => void
+  onUpdate?: (id: string, text?: string) => void
   onDelete?: () => void
   startEdit: () => void
 }) => {
@@ -40,7 +40,7 @@ const MsgItem = ({
         </sub>
       </h3>
       {isEditing ? (
-        <>{/* <MsgInput id={id} text={text} mutate={onUpdate} /> */}</>
+        <>{<MsgInput id={id} text={text} mutate={onUpdate} />}</>
       ) : (
         text
       )}

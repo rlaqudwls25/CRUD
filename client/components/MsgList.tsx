@@ -3,7 +3,12 @@ import { Message, Users, METHOD } from '../types/types'
 import { useRouter } from 'next/router'
 import { fetcher, QueryKeys } from '../fetcher'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { CREATE_MESSAGE, GET_MESSAGES } from '../graphql/messages'
+import {
+  CREATE_MESSAGE,
+  DELETE_MESSAGE,
+  GET_MESSAGES,
+  UPDATE_MESSAGE,
+} from '../graphql/messages'
 import MsgItem from './MsgItem'
 import MsgInput from './MsgInput'
 import Loading from './Loading'
@@ -13,23 +18,13 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
   const [msgs, setMsgs] = useState<Message[]>(smsgs)
   const [isEditId, setIsEditId] = useState<string | null>(null)
   // const [next, setNext] = useState(true)
+  // const intersecting = useInfiniteScroll(fetchMoreElement)
+  // const fetchMoreElement = useRef<HTMLDivElement>(null)
   const {
     query: { userId = '' },
   } = useRouter()
-  // const fetchMoreElement = useRef<HTMLDivElement>(null)
-  // const intersecting = useInfiniteScroll(fetchMoreElement)
   const [loading, setLoading] = useState<boolean>(false)
   const client = useQueryClient()
-
-  // useEffect(() => {
-  //   if (intersecting && next) {
-  //     getMessages()
-  //   }
-  // }, [intersecting])
-
-  // useEffect(() => {
-  //   getMessages()
-  // }, [])
 
   const { data, error, isError } = useQuery([QueryKeys.MESSAGES], () =>
     fetcher(GET_MESSAGES)
@@ -40,103 +35,70 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
     setMsgs(data?.messages)
   }, [data?.messages])
 
-  // if (isError) {
-  //   return null
-  // }
-
-  // const getMessages = async (): Promise<void> => {
-  //   try {
-  //     setLoading(true)
-  //     const newMsgs = await fetcher(METHOD.GET, '/messages', {
-  //       params: { cursor: msgs[msgs.length - 1]?.id || '' },
-  //     })
-
-  //     if (newMsgs.length === 0) {
-  //       setNext(false)
-  //       return
-  //     }
-
-  //     setMsgs((msgs) => [...msgs, ...newMsgs])
-  //   } catch (error) {
-  //     console.error(error)
-  //   } finally {
-  //     setLoading(false)
-  //   }
-  // }
-
   const { mutate: onCreate } = useMutation(
     ({ text }: { text: string }) => fetcher(CREATE_MESSAGE, { text, userId }),
     {
       onSuccess: ({ createMessage }) => {
         client.setQueriesData([QueryKeys.MESSAGES], (old: any) => {
+          setLoading(true)
           return {
             messages: [createMessage, ...old.messages],
+          }
+        })
+        setLoading(false)
+      },
+      onError: () => {
+        console.error('에러 발생')
+      },
+    }
+  )
+
+  const { mutate: onUpdate } = useMutation(
+    ({ text, id }: { text: string; id: number }) =>
+      fetcher(UPDATE_MESSAGE, { text, id, userId }),
+    {
+      onSuccess: ({ updateMessage }) => {
+        client.setQueryData([QueryKeys.MESSAGES], (old: any) => {
+          setLoading(true)
+          const targetIndex = old.messages.findIndex(
+            (msg: any) => msg.id === updateMessage.id
+          )
+          if (targetIndex < 0) return old
+          const newMsgs = [...old.messages]
+          newMsgs.splice(targetIndex, 1, updateMessage)
+          return {
+            messages: newMsgs,
+          }
+        })
+        doneEdit()
+        setLoading(false)
+      },
+      onError: () => {
+        console.error('에러 발생')
+      },
+    }
+  )
+
+  const { mutate: onDelete } = useMutation(
+    (id: { id: string }) => fetcher(DELETE_MESSAGE, { id, userId }),
+    {
+      onSuccess: ({ deleteMessage: deleteId }) => {
+        client.setQueriesData([QueryKeys.MESSAGES], (old: any) => {
+          const targetIndex = old.messages.findIndex(
+            (msg: any) => msg.id === deleteId
+          )
+          if (targetIndex < 0) return old
+
+          const newMsgs = [...old.messages]
+          newMsgs.splice(targetIndex, 1)
+
+          return {
+            messages: newMsgs,
           }
         })
       },
     }
   )
-
-  // const onCreate = async (text: string): Promise<void> => {
-  //   try {
-  //     setLoading(true)
-  //     const newMsg = await fetcher(METHOD.POST, '/messages', { text, userId })
-
-  //     if (!newMsg) throw Error('something wrong')
-  //     setMsgs((msgs) => [newMsg, ...msgs])
-  //   } catch (error) {
-  //     console.error(error)
-  //   } finally {
-  //     setLoading(false)
-  //   }
-  // }
-
-  // const onUpdate = async (
-  //   text: string,
-  //   id?: string
-  // ): Promise<Message[] | undefined> => {
-  //   try {
-  //     setLoading(true)
-  //     const newMsg = await fetcher(METHOD.PUT, `/messages/${id}`, {
-  //       text,
-  //       userId,
-  //     })
-
-  //     const targetIndex = msgs.findIndex((msg) => msg.id === id)
-  //     if (targetIndex < 0) return msgs
-
-  //     msgs.splice(targetIndex, 1, newMsg)
-
-  //     setMsgs((msgs) => [...msgs])
-
-  //     doneEdit()
-  //   } catch (error) {
-  //     console.error(error)
-  //   } finally {
-  //     setLoading(false)
-  //   }
-  // }
-
-  // const onDelete = async (id: string): Promise<Message[] | undefined> => {
-  //   try {
-  //     setLoading(true)
-  //     const deleteId = await fetcher(METHOD.DELETE, `/messages/${id}`, {
-  //       params: { userId },
-  //     })
-
-  //     const targetIndex = msgs.findIndex((msg) => msg.id === deleteId + '')
-
-  //     if (targetIndex < 0) return msgs
-
-  //     msgs.splice(targetIndex, 1)
-
-  //     setMsgs((msgs) => [...msgs])
-  //   } catch (error) {
-  //     console.error(error)
-  //   } finally {
-  //     setLoading(false)
-  //   }
-  // }
 
   const doneEdit = () => setIsEditId(null)
 
@@ -153,8 +115,8 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
                 <MsgItem
                   key={x.id}
                   {...x}
-                  // onUpdate={onUpdate}
-                  // onDelete={() => onDelete(x.id)}
+                  onUpdate={onUpdate}
+                  onDelete={() => onDelete(x.id)}
                   startEdit={() => setIsEditId(x.id)}
                   isEditing={isEditId === x.id}
                   myId={userId}
