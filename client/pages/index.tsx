@@ -11,8 +11,13 @@ const Home = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
 export default Home
 
 export const getServerSideProps = async () => {
-  const { messages: smsgs } = await fetcher(GET_MESSAGES)
-  const { users } = await fetcher(GET_USERS)
+  // const { messages: smsgs } = await fetcher(GET_MESSAGES)
+  // const { users } = await fetcher(GET_USERS)
+
+  const [{ messages: smsgs }, { users }] = await Promise.all([
+    fetcher(GET_MESSAGES),
+    fetcher(GET_USERS),
+  ])
 
   return { props: { smsgs, users } }
 }

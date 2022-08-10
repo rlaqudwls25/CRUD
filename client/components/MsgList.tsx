@@ -2,7 +2,12 @@ import React, { useEffect, useState, useRef } from 'react'
 import { Message, Users, METHOD } from '../types/types'
 import { useRouter } from 'next/router'
 import { fetcher, QueryKeys } from '../fetcher'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query'
 import {
   CREATE_MESSAGE,
   DELETE_MESSAGE,
@@ -12,28 +17,40 @@ import {
 import MsgItem from './MsgItem'
 import MsgInput from './MsgInput'
 import Loading from './Loading'
-// import useInfiniteScroll from '../hooks/useInfiniteScroll'
+import useInfiniteScroll from '../hooks/useInfiniteScroll'
 
 const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
   const [msgs, setMsgs] = useState<Message[]>(smsgs)
   const [isEditId, setIsEditId] = useState<string | null>(null)
-  // const [next, setNext] = useState(true)
-  // const intersecting = useInfiniteScroll(fetchMoreElement)
-  // const fetchMoreElement = useRef<HTMLDivElement>(null)
+  const fetchMoreElement = useRef<HTMLDivElement>(null)
+  const intersecting = useInfiniteScroll(fetchMoreElement)
   const {
     query: { userId = '' },
   } = useRouter()
   const [loading, setLoading] = useState<boolean>(false)
   const client = useQueryClient()
 
-  const { data, error, isError } = useQuery([QueryKeys.MESSAGES], () =>
-    fetcher(GET_MESSAGES)
+  const { data, error, isError, hasNextPage, fetchNextPage } = useInfiniteQuery(
+    [QueryKeys.MESSAGES],
+    ({ pageParam = '' }) => fetcher(GET_MESSAGES, { cursor: pageParam }),
+    {
+      getNextPageParam: (res) => {
+        console.log('res', res)
+        return res.messages?.[res.messages.length - 1]?.id
+      },
+    }
   )
 
   useEffect(() => {
-    if (!data?.messages) return
-    setMsgs(data?.messages)
-  }, [data?.messages])
+    if (!data?.pages) return
+    const mergedMsgs = data.pages.flatMap((d) => d.messages)
+    console.log('mergedMsgs', mergedMsgs)
+    setMsgs(mergedMsgs)
+  }, [data?.pages])
+
+  useEffect(() => {
+    if (intersecting && hasNextPage) fetchNextPage()
+  }, [intersecting, hasNextPage])
 
   const { mutate: onCreate } = useMutation(
     ({ text }: { text: string }) => fetcher(CREATE_MESSAGE, { text, userId }),
@@ -102,6 +119,8 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
 
   const doneEdit = () => setIsEditId(null)
 
+  console.log('data', data)
+
   return (
     <>
       <MsgInput mutate={onCreate} />
@@ -124,7 +143,7 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
                 />
               ))}
           </ul>
-          {/* <div ref={fetchMoreElement} /> */}
+          <div ref={fetchMoreElement} />
         </>
       )}
     </>
