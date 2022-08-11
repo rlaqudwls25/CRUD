@@ -43,9 +43,8 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
 
   useEffect(() => {
     if (!data?.pages) return
-    const mergedMsgs = data.pages.flatMap((d) => d.messages)
-    console.log('mergedMsgs', mergedMsgs)
-    setMsgs(mergedMsgs)
+    // const mergedMsgs = data.pages.flatMap((d) => d.messages)
+    setMsgs(data.pages)
   }, [data?.pages])
 
   useEffect(() => {
@@ -120,7 +119,6 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
   const doneEdit = () => setIsEditId(null)
 
   console.log('data', data)
-
   return (
     <>
       <MsgInput mutate={onCreate} />
@@ -130,18 +128,22 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
         <>
           <ul className="messages">
             {msgs &&
-              msgs.map((x) => (
-                <MsgItem
-                  key={x.id}
-                  {...x}
-                  onUpdate={onUpdate}
-                  onDelete={() => onDelete(x.id)}
-                  startEdit={() => setIsEditId(x.id)}
-                  isEditing={isEditId === x.id}
-                  myId={userId}
-                  user={users.find((user: any) => user.id === x.userId)}
-                />
-              ))}
+              msgs.map(({ messages }: any) =>
+                messages?.map((x: any) => {
+                  return (
+                    <MsgItem
+                      key={x.id}
+                      {...x}
+                      onUpdate={onUpdate}
+                      onDelete={() => onDelete(x.id)}
+                      startEdit={() => setIsEditId(x.id)}
+                      isEditing={isEditId === x.id}
+                      myId={userId}
+                      user={users.find((user: any) => user.id === x.userId)}
+                    />
+                  )
+                })
+              )}
           </ul>
           <div ref={fetchMoreElement} />
         </>
