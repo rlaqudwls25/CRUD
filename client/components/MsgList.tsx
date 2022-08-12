@@ -20,10 +20,12 @@ import Loading from './Loading'
 import useInfiniteScroll from '../hooks/useInfiniteScroll'
 
 const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
-  const [msgs, setMsgs] = useState<Message[]>(smsgs)
+  const [msgs, setMsgs] = useState<Object[]>([{ messages: smsgs }])
   const [isEditId, setIsEditId] = useState<string | null>(null)
   const fetchMoreElement = useRef<HTMLDivElement>(null)
   const intersecting = useInfiniteScroll(fetchMoreElement)
+
+  console.log('msgs', msgs)
   const {
     query: { userId = '' },
   } = useRouter()
@@ -129,20 +131,18 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
           <ul className="messages">
             {msgs &&
               msgs.map(({ messages }: any) =>
-                messages?.map((x: any) => {
-                  return (
-                    <MsgItem
-                      key={x.id}
-                      {...x}
-                      onUpdate={onUpdate}
-                      onDelete={() => onDelete(x.id)}
-                      startEdit={() => setIsEditId(x.id)}
-                      isEditing={isEditId === x.id}
-                      myId={userId}
-                      user={users.find((user: any) => user.id === x.userId)}
-                    />
-                  )
-                })
+                messages?.map((x: any) => (
+                  <MsgItem
+                    key={x.id}
+                    {...x}
+                    onUpdate={onUpdate}
+                    onDelete={() => onDelete(x.id)}
+                    startEdit={() => setIsEditId(x.id)}
+                    isEditing={isEditId === x.id}
+                    myId={userId}
+                    user={users.find((user: any) => user.id === x.userId)}
+                  />
+                ))
               )}
           </ul>
           <div ref={fetchMoreElement} />
