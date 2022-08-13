@@ -25,7 +25,6 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
   const fetchMoreElement = useRef<HTMLDivElement>(null)
   const intersecting = useInfiniteScroll(fetchMoreElement)
 
-  console.log('msgs', msgs)
   const {
     query: { userId = '' },
   } = useRouter()
@@ -37,7 +36,6 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
     ({ pageParam = '' }) => fetcher(GET_MESSAGES, { cursor: pageParam }),
     {
       getNextPageParam: (res) => {
-        console.log('res', res)
         return res.messages?.[res.messages.length - 1]?.id
       },
     }
@@ -76,6 +74,7 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
       fetcher(UPDATE_MESSAGE, { text, id, userId }),
     {
       onSuccess: ({ updateMessage }) => {
+        doneEdit()
         client.setQueryData([QueryKeys.MESSAGES], (old: any) => {
           setLoading(true)
           const targetIndex = old.messages.findIndex(
@@ -88,11 +87,11 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
             messages: newMsgs,
           }
         })
-        doneEdit()
         setLoading(false)
       },
       onError: () => {
         console.error('에러 발생')
+        setLoading(false)
       },
     }
   )
@@ -120,7 +119,6 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
 
   const doneEdit = () => setIsEditId(null)
 
-  console.log('data', data)
   return (
     <>
       <MsgInput mutate={onCreate} />
