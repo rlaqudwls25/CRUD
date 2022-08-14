@@ -25,47 +25,31 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
   const fetchMoreElement = useRef<HTMLDivElement>(null)
   const intersecting = useInfiniteScroll(fetchMoreElement)
 
+  // console.log('msgs', msgs)
+
   const {
     query: { userId = '' },
   } = useRouter()
   const [loading, setLoading] = useState<boolean>(false)
   const client = useQueryClient()
 
-  const { data, error, isError, hasNextPage, fetchNextPage } = useInfiniteQuery(
-    [QueryKeys.MESSAGES],
-    ({ pageParam = '' }) => fetcher(GET_MESSAGES, { cursor: pageParam }),
-    {
-      getNextPageParam: (res) => {
-        return res.messages?.[res.messages.length - 1]?.id
-      },
-    }
-  )
-
-  useEffect(() => {
-    if (!data?.pages) return
-    // const mergedMsgs = data.pages.flatMap((d) => d.messages)
-    setMsgs(data.pages)
-  }, [data?.pages])
-
-  useEffect(() => {
-    if (intersecting && hasNextPage) fetchNextPage()
-  }, [intersecting, hasNextPage])
-
   const { mutate: onCreate } = useMutation(
     ({ text }: { text: string }) => fetcher(CREATE_MESSAGE, { text, userId }),
     {
       onSuccess: ({ createMessage }) => {
+        console.log(createMessage)
         client.setQueriesData([QueryKeys.MESSAGES], (old: any) => {
-          setLoading(true)
+          console.log('old', old)
+          // setLoading(true)
           return {
             messages: [createMessage, ...old.messages],
           }
         })
-        setLoading(false)
+        // setLoading(false)
       },
-      onError: () => {
-        console.error('에러 발생')
-      },
+      // onError: () => {
+      //   console.error('에러 발생')
+      // },
     }
   )
 
@@ -117,6 +101,27 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
     }
   )
 
+  const { data, error, isError, hasNextPage, fetchNextPage } = useInfiniteQuery(
+    [QueryKeys.MESSAGES],
+    ({ pageParam = '' }) => fetcher(GET_MESSAGES, { cursor: pageParam }),
+    {
+      getNextPageParam: (res) => {
+        return res.messages?.[res.messages.length - 1]?.id
+      },
+    }
+  )
+
+  useEffect(() => {
+    if (!data?.pages) return
+    // const mergedMsgs = data.pages.flatMap((d) => d.messages)
+    // console.log('data.pages', data.pages)
+    setMsgs(data.pages)
+  }, [data?.pages])
+
+  useEffect(() => {
+    if (intersecting && hasNextPage) fetchNextPage()
+  }, [intersecting, hasNextPage])
+
   const doneEdit = () => setIsEditId(null)
 
   return (
@@ -127,21 +132,20 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
       ) : (
         <>
           <ul className="messages">
-            {msgs &&
-              msgs.map(({ messages }: any) =>
-                messages?.map((x: any) => (
-                  <MsgItem
-                    key={x.id}
-                    {...x}
-                    onUpdate={onUpdate}
-                    onDelete={() => onDelete(x.id)}
-                    startEdit={() => setIsEditId(x.id)}
-                    isEditing={isEditId === x.id}
-                    myId={userId}
-                    user={users.find((user: any) => user.id === x.userId)}
-                  />
-                ))
-              )}
+            {msgs?.map(({ messages }: any) =>
+              messages?.map((x: any) => (
+                <MsgItem
+                  key={x.id}
+                  {...x}
+                  onUpdate={onUpdate}
+                  onDelete={() => onDelete(x.id)}
+                  startEdit={() => setIsEditId(x.id)}
+                  isEditing={isEditId === x.id}
+                  myId={userId}
+                  user={users.find((user: any) => user.id === x.userId)}
+                />
+              ))
+            )}
           </ul>
           <div ref={fetchMoreElement} />
         </>
