@@ -20,10 +20,10 @@ const App = ({ Component, pageProps }) => {
   }
   return (
     <QueryClientProvider client={getClient()}>
-      <Hydrate state={pageProps.dehydratedState}>
-        {/* server side 에서 받아온 property를 data가 없고 html만 남아있는 */}
-        <Component {...pageProps} />
-      </Hydrate>
+      {/* <Hydrate state={pageProps.dehydratedState}> */}
+      {/* server side 에서 받아온 property를 data가 없고 html만 남아있는 */}
+      <Component {...pageProps} />
+      {/* </Hydrate> */}
     </QueryClientProvider>
   )
 }

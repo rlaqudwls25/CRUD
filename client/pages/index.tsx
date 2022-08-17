@@ -19,5 +19,7 @@ export const getServerSideProps = async () => {
   //   fetcher(GET_USERS),
   // ])
 
+  console.log('smsgs', smsgs)
+
   return { props: { smsgs, users } }
 }

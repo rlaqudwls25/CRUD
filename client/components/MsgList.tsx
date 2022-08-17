@@ -25,8 +25,6 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
   const fetchMoreElement = useRef<HTMLDivElement>(null)
   const intersecting = useInfiniteScroll(fetchMoreElement)
 
-  // console.log('msgs', msgs)
-
   const {
     query: { userId = '' },
   } = useRouter()
@@ -38,18 +36,23 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
     {
       onSuccess: ({ createMessage }) => {
         console.log(createMessage)
-        client.setQueriesData([QueryKeys.MESSAGES], (old: any) => {
+        client.setQueryData([QueryKeys.MESSAGES], (old: any) => {
           console.log('old', old)
-          // setLoading(true)
+          setLoading(true)
           return {
-            messages: [createMessage, ...old.messages],
+            pageParam: old.pageParam,
+            pages: [
+              { messages: [createMessage, ...old.pages[0].messages] },
+              ...old.pages.slice(1),
+            ],
           }
         })
-        // setLoading(false)
+        setLoading(false)
       },
-      // onError: () => {
-      //   console.error('에러 발생')
-      // },
+      onError: () => {
+        setLoading(false)
+        console.error('에러 발생')
+      },
     }
   )
 
@@ -84,7 +87,7 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
     (id: { id: string }) => fetcher(DELETE_MESSAGE, { id, userId }),
     {
       onSuccess: ({ deleteMessage: deleteId }) => {
-        client.setQueriesData([QueryKeys.MESSAGES], (old: any) => {
+        client.setQueryData([QueryKeys.MESSAGES], (old: any) => {
           const targetIndex = old.messages.findIndex(
             (msg: any) => msg.id === deleteId
           )
@@ -114,7 +117,6 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
   useEffect(() => {
     if (!data?.pages) return
     // const mergedMsgs = data.pages.flatMap((d) => d.messages)
-    // console.log('data.pages', data.pages)
     setMsgs(data.pages)
   }, [data?.pages])
 
@@ -123,6 +125,8 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
   }, [intersecting, hasNextPage])
 
   const doneEdit = () => setIsEditId(null)
+
+  console.log('data', data)
 
   return (
     <>
