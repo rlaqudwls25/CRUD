@@ -16,6 +16,19 @@ export const QueryKeys = {
   USER: 'USER',
 }
 
+export const findMsgIndex = (pages: { messages: Message[] }[], id: number) => {
+  let msgIdx = -1
+  const pageId = pages.findIndex(({ messages }) => {
+    msgIdx = messages.findIndex((msg: any) => msg.id === id)
+    if (msgIdx > -1) {
+      return true
+    } else {
+      return false
+    }
+  })
+  return { pageId, msgIdx }
+}
+
 // axios.defaults.baseURL = 'http://localhost:8000'
 
 // const fetcher = async (

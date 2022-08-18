@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { Message, Users, METHOD } from '../types/types'
 import { useRouter } from 'next/router'
-import { fetcher, QueryKeys } from '../fetcher'
+import { fetcher, QueryKeys, findMsgIndex } from '../fetcher'
 import {
   useInfiniteQuery,
   useMutation,
@@ -74,19 +74,6 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
       },
     }
   )
-
-  const findMsgIndex = (pages: { messages: Message[] }[], id: number) => {
-    let msgIdx = -1
-    const pageId = pages.findIndex(({ messages }) => {
-      msgIdx = messages.findIndex((msg: any) => msg.id === id)
-      if (msgIdx > -1) {
-        return true
-      } else {
-        return false
-      }
-    })
-    return { pageId, msgIdx }
-  }
 
   const { mutate: onUpdate } = useMutation(
     ({ text, id }: { text: string; id: number }) =>
