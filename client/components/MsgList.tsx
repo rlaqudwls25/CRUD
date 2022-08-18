@@ -31,79 +31,6 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
   const [loading, setLoading] = useState<boolean>(false)
   const client = useQueryClient()
 
-  const { mutate: onCreate } = useMutation(
-    ({ text }: { text: string }) => fetcher(CREATE_MESSAGE, { text, userId }),
-    {
-      onSuccess: ({ createMessage }) => {
-        console.log(createMessage)
-        client.setQueryData([QueryKeys.MESSAGES], (old: any) => {
-          console.log('old', old)
-          setLoading(true)
-          return {
-            pageParam: old.pageParam,
-            pages: [
-              { messages: [createMessage, ...old.pages[0].messages] },
-              ...old.pages.slice(1),
-            ],
-          }
-        })
-        setLoading(false)
-      },
-      onError: () => {
-        setLoading(false)
-        console.error('에러 발생')
-      },
-    }
-  )
-
-  const { mutate: onUpdate } = useMutation(
-    ({ text, id }: { text: string; id: number }) =>
-      fetcher(UPDATE_MESSAGE, { text, id, userId }),
-    {
-      onSuccess: ({ updateMessage }) => {
-        doneEdit()
-        client.setQueryData([QueryKeys.MESSAGES], (old: any) => {
-          setLoading(true)
-          const targetIndex = old.messages.findIndex(
-            (msg: any) => msg.id === updateMessage.id
-          )
-          if (targetIndex < 0) return old
-          const newMsgs = [...old.messages]
-          newMsgs.splice(targetIndex, 1, updateMessage)
-          return {
-            messages: newMsgs,
-          }
-        })
-        setLoading(false)
-      },
-      onError: () => {
-        console.error('에러 발생')
-        setLoading(false)
-      },
-    }
-  )
-
-  const { mutate: onDelete } = useMutation(
-    (id: { id: string }) => fetcher(DELETE_MESSAGE, { id, userId }),
-    {
-      onSuccess: ({ deleteMessage: deleteId }) => {
-        client.setQueryData([QueryKeys.MESSAGES], (old: any) => {
-          const targetIndex = old.messages.findIndex(
-            (msg: any) => msg.id === deleteId
-          )
-          if (targetIndex < 0) return old
-
-          const newMsgs = [...old.messages]
-          newMsgs.splice(targetIndex, 1)
-
-          return {
-            messages: newMsgs,
-          }
-        })
-      },
-    }
-  )
-
   const { data, error, isError, hasNextPage, fetchNextPage } = useInfiniteQuery(
     [QueryKeys.MESSAGES],
     ({ pageParam = '' }) => fetcher(GET_MESSAGES, { cursor: pageParam }),
@@ -124,9 +51,97 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
     if (intersecting && hasNextPage) fetchNextPage()
   }, [intersecting, hasNextPage])
 
-  const doneEdit = () => setIsEditId(null)
+  const { mutate: onCreate } = useMutation(
+    ({ text }: { text: string }) => fetcher(CREATE_MESSAGE, { text, userId }),
+    {
+      onSuccess: ({ createMessage }) => {
+        setLoading(true)
 
-  console.log('data', data)
+        client.setQueryData([QueryKeys.MESSAGES], (old: any) => {
+          return {
+            pageParam: old.pageParam,
+            pages: [
+              { messages: [createMessage, ...old.pages[0].messages] },
+              ...old.pages.slice(1),
+            ],
+          }
+        })
+        setLoading(false)
+      },
+      onError: () => {
+        setLoading(false)
+        console.error('에러 발생')
+      },
+    }
+  )
+
+  const findMsgIndex = (pages: { messages: Message[] }[], id: number) => {
+    let msgIdx = -1
+    const pageId = pages.findIndex(({ messages }) => {
+      msgIdx = messages.findIndex((msg: any) => msg.id === id)
+      if (msgIdx > -1) {
+        return true
+      } else {
+        return false
+      }
+    })
+    return { pageId, msgIdx }
+  }
+
+  const { mutate: onUpdate } = useMutation(
+    ({ text, id }: { text: string; id: number }) =>
+      fetcher(UPDATE_MESSAGE, { text, id, userId }),
+    {
+      onSuccess: ({ updateMessage }) => {
+        doneEdit()
+        setLoading(true)
+        client.setQueryData([QueryKeys.MESSAGES], (old: any) => {
+          const { pageId, msgIdx } = findMsgIndex(old.pages, updateMessage.id)
+          if (pageId < 0 || msgIdx < 0) return old
+          const newPages = [...old.pages]
+          newPages[pageId] = { messages: [...newPages[pageId].messages] }
+          newPages[pageId].messages.splice(msgIdx, 1, updateMessage)
+          return {
+            pageParam: old.pageParam,
+            pages: newPages,
+          }
+        })
+        setLoading(false)
+      },
+      onError: () => {
+        console.error('에러 발생')
+        setLoading(false)
+      },
+    }
+  )
+
+  const { mutate: onDelete } = useMutation(
+    (id: { id: string }) => fetcher(DELETE_MESSAGE, { id, userId }),
+    {
+      onSuccess: ({ deleteMessage: deleteId }) => {
+        setLoading(true)
+        client.setQueryData([QueryKeys.MESSAGES], (old: any) => {
+          const { pageId, msgIdx } = findMsgIndex(old.pages, deleteId)
+          if (pageId < 0 || msgIdx < 0) return old
+          const newPages = [...old.pages]
+          newPages[pageId] = { messages: [...newPages[pageId].messages] }
+          newPages[pageId].messages.splice(msgIdx, 1)
+
+          return {
+            pageParam: old.pageParam,
+            pages: newPages,
+          }
+        })
+        setLoading(false)
+      },
+      onError: () => {
+        console.error('에러 발생')
+        setLoading(false)
+      },
+    }
+  )
+
+  const doneEdit = () => setIsEditId(null)
 
   return (
     <>

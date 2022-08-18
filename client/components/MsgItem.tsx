@@ -1,6 +1,6 @@
 import React from 'react'
 import MsgInput from './MsgInput'
-import { User } from '../types/types'
+import { User, Mutate } from '../types/types'
 import Button from './Button'
 
 const MsgItem = ({
@@ -20,7 +20,7 @@ const MsgItem = ({
   myId: string | string[]
   user: User
   isEditing: boolean
-  onUpdate?: (id: string, text?: string) => void
+  onUpdate: Mutate
   onDelete?: () => void
   startEdit: () => void
 }) => {
@@ -40,7 +40,7 @@ const MsgItem = ({
         </sub>
       </h3>
       {isEditing ? (
-        <>{<MsgInput id={id} text={text} mutate={onUpdate} />}</>
+        <>{<MsgInput mutate={onUpdate} text={text} id={id} />}</>
       ) : (
         text
       )}

@@ -20,3 +20,5 @@ export enum METHOD {
   PUT = 'put',
   DELETE = 'delete',
 }
+
+export type Mutate = ({ text, id }: { text: string; id?: string }) => void

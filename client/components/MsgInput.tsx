@@ -1,14 +1,15 @@
 import React, { FormEvent, useRef } from 'react'
+import { Mutate } from '../types/types'
 import Button from './Button'
 
 const MsgInput = ({
   mutate,
+  text = '',
   id = undefined,
-  text,
 }: {
-  mutate: ({ text, id }: { text: string; id?: string }) => void
-  id?: string
+  mutate: Mutate
   text?: string
+  id?: string
 }) => {
   const textRef = useRef<HTMLTextAreaElement>(null)
 
