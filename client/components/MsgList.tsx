@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { Message, Users, METHOD } from '../types/types'
+import { Message } from '../types/types'
 import { useRouter } from 'next/router'
 import { fetcher, QueryKeys, findMsgIndex } from '../fetcher'
 import {
@@ -19,7 +19,7 @@ import MsgInput from './MsgInput'
 import Loading from './Loading'
 import useInfiniteScroll from '../hooks/useInfiniteScroll'
 
-const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
+const MsgList = ({ smsgs }: { smsgs: Message[] }) => {
   const [msgs, setMsgs] = useState<Object[]>([{ messages: smsgs }])
   const [isEditId, setIsEditId] = useState<string | null>(null)
   const fetchMoreElement = useRef<HTMLDivElement>(null)
@@ -148,7 +148,6 @@ const MsgList = ({ smsgs, users }: { smsgs: Message[]; users: Users }) => {
                   startEdit={() => setIsEditId(x.id)}
                   isEditing={isEditId === x.id}
                   myId={userId}
-                  user={users.find((user: any) => user.id === x.userId)}
                 />
               ))
             )}

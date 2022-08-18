@@ -2,6 +2,7 @@
 // import { METHOD } from './types/types'
 import { DocumentNode } from 'graphql/language/ast'
 import { request } from 'graphql-request'
+import { Message } from './types/types'
 const URL = 'http://localhost:8000/graphql'
 
 export const fetcher = (
