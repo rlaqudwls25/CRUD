@@ -2,7 +2,7 @@
 
 
 ## 1. 목표
-* CRUD(Create, Read, Update, Delete)의 기본기를 다진다.
+* CRUD(Create, Read, Update, Delete) 기능을 만들어본다.
 * Javascript ES6에 익숙해진다.
 * TypeScript에 익숙해진다.
 * REST API를 직접 만들어본다.
