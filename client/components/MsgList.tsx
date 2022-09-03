@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { Message } from '../types/types'
+import { Message, MsgQueryData } from '../types/types'
 import { useRouter } from 'next/router'
 import { fetcher, QueryKeys, findMsgIndex } from '../fetcher'
 import {
@@ -57,9 +57,10 @@ const MsgList = ({ smsgs }: { smsgs: Message[] }) => {
       onSuccess: ({ createMessage }) => {
         setLoading(true)
 
-        client.setQueryData([QueryKeys.MESSAGES], (old: any) => {
+        client.setQueryData<MsgQueryData>([QueryKeys.MESSAGES], (old) => {
+          if (!old) return { pages: [{ messages: [] }], pageParams: '' }
           return {
-            pageParam: old.pageParam,
+            pageParams: old?.pageParams,
             pages: [
               { messages: [createMessage, ...old.pages[0].messages] },
               ...old.pages.slice(1),
@@ -82,14 +83,15 @@ const MsgList = ({ smsgs }: { smsgs: Message[] }) => {
       onSuccess: ({ updateMessage }) => {
         doneEdit()
         setLoading(true)
-        client.setQueryData([QueryKeys.MESSAGES], (old: any) => {
+        client.setQueryData<MsgQueryData>([QueryKeys.MESSAGES], (old) => {
+          if (!old) return { pages: [{ messages: [] }], pageParams: '' }
           const { pageId, msgIdx } = findMsgIndex(old.pages, updateMessage.id)
           if (pageId < 0 || msgIdx < 0) return old
           const newPages = [...old.pages]
           newPages[pageId] = { messages: [...newPages[pageId].messages] }
           newPages[pageId].messages.splice(msgIdx, 1, updateMessage)
           return {
-            pageParam: old.pageParam,
+            pageParams: old.pageParams,
             pages: newPages,
           }
         })
@@ -107,7 +109,8 @@ const MsgList = ({ smsgs }: { smsgs: Message[] }) => {
     {
       onSuccess: ({ deleteMessage: deleteId }) => {
         setLoading(true)
-        client.setQueryData([QueryKeys.MESSAGES], (old: any) => {
+        client.setQueryData<MsgQueryData>([QueryKeys.MESSAGES], (old) => {
+          if (!old) return { pages: [{ messages: [] }], pageParams: '' }
           const { pageId, msgIdx } = findMsgIndex(old.pages, deleteId)
           if (pageId < 0 || msgIdx < 0) return old
           const newPages = [...old.pages]
@@ -115,7 +118,7 @@ const MsgList = ({ smsgs }: { smsgs: Message[] }) => {
           newPages[pageId].messages.splice(msgIdx, 1)
 
           return {
-            pageParam: old.pageParam,
+            pageParams: old.pageParams,
             pages: newPages,
           }
         })

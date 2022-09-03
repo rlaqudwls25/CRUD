@@ -3,6 +3,7 @@ export interface Message {
   userId: string
   timestamp: number
   text: string
+  user: User
 }
 
 export interface User {
@@ -22,3 +23,8 @@ export enum METHOD {
 }
 
 export type Mutate = ({ text, id }: { text: string; id?: string }) => void
+
+export interface MsgQueryData {
+  pages: { messages: Message[] }[]
+  pageParams?: string
+}
