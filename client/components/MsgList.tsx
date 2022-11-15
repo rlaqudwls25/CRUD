@@ -28,18 +28,18 @@ const MsgList = ({ smsgs }: { smsgs: Message[] }) => {
   const {
     query: { userId = '' },
   } = useRouter()
-  const [loading, setLoading] = useState<boolean>(false)
   const client = useQueryClient()
 
-  const { data, error, isError, hasNextPage, fetchNextPage } = useInfiniteQuery(
-    [QueryKeys.MESSAGES],
-    ({ pageParam = '' }) => fetcher(GET_MESSAGES, { cursor: pageParam }),
-    {
-      getNextPageParam: (res) => {
-        return res.messages?.[res.messages.length - 1]?.id
-      },
-    }
-  )
+  const { data, error, isError, hasNextPage, fetchNextPage, isLoading } =
+    useInfiniteQuery(
+      [QueryKeys.MESSAGES],
+      ({ pageParam = '' }) => fetcher(GET_MESSAGES, { cursor: pageParam }),
+      {
+        getNextPageParam: (res) => {
+          return res.messages?.[res.messages.length - 1]?.id
+        },
+      }
+    )
 
   useEffect(() => {
     if (!data?.pages) return
@@ -55,8 +55,6 @@ const MsgList = ({ smsgs }: { smsgs: Message[] }) => {
     ({ text }: { text: string }) => fetcher(CREATE_MESSAGE, { text, userId }),
     {
       onSuccess: ({ createMessage }) => {
-        setLoading(true)
-
         client.setQueryData<MsgQueryData>([QueryKeys.MESSAGES], (old) => {
           if (!old) return { pages: [{ messages: [] }], pageParams: '' }
           return {
@@ -67,10 +65,8 @@ const MsgList = ({ smsgs }: { smsgs: Message[] }) => {
             ],
           }
         })
-        setLoading(false)
       },
       onError: () => {
-        setLoading(false)
         console.error('에러 발생')
       },
     }
@@ -82,7 +78,6 @@ const MsgList = ({ smsgs }: { smsgs: Message[] }) => {
     {
       onSuccess: ({ updateMessage }) => {
         doneEdit()
-        setLoading(true)
         client.setQueryData<MsgQueryData>([QueryKeys.MESSAGES], (old) => {
           if (!old) return { pages: [{ messages: [] }], pageParams: '' }
           const { pageId, msgIdx } = findMsgIndex(old.pages, updateMessage.id)
@@ -95,11 +90,9 @@ const MsgList = ({ smsgs }: { smsgs: Message[] }) => {
             pages: newPages,
           }
         })
-        setLoading(false)
       },
       onError: () => {
         console.error('에러 발생')
-        setLoading(false)
       },
     }
   )
@@ -108,7 +101,6 @@ const MsgList = ({ smsgs }: { smsgs: Message[] }) => {
     (id: { id: string }) => fetcher(DELETE_MESSAGE, { id, userId }),
     {
       onSuccess: ({ deleteMessage: deleteId }) => {
-        setLoading(true)
         client.setQueryData<MsgQueryData>([QueryKeys.MESSAGES], (old) => {
           if (!old) return { pages: [{ messages: [] }], pageParams: '' }
           const { pageId, msgIdx } = findMsgIndex(old.pages, deleteId)
@@ -122,42 +114,40 @@ const MsgList = ({ smsgs }: { smsgs: Message[] }) => {
             pages: newPages,
           }
         })
-        setLoading(false)
       },
       onError: () => {
         console.error('에러 발생')
-        setLoading(false)
       },
     }
   )
 
   const doneEdit = () => setIsEditId(null)
 
+  if (isLoading) {
+    return <Loading />
+  }
+
   return (
     <>
       <MsgInput mutate={onCreate} />
-      {loading ? (
-        <Loading />
-      ) : (
-        <>
-          <ul className="messages">
-            {msgs?.map(({ messages }: any) =>
-              messages?.map((x: any) => (
-                <MsgItem
-                  key={x.id}
-                  {...x}
-                  onUpdate={onUpdate}
-                  onDelete={() => onDelete(x.id)}
-                  startEdit={() => setIsEditId(x.id)}
-                  isEditing={isEditId === x.id}
-                  myId={userId}
-                />
-              ))
-            )}
-          </ul>
-          <div ref={fetchMoreElement} />
-        </>
-      )}
+      <>
+        <ul className="messages">
+          {msgs?.map(({ messages }: any) =>
+            messages?.map((x: any) => (
+              <MsgItem
+                key={x.id}
+                {...x}
+                onUpdate={onUpdate}
+                onDelete={() => onDelete(x.id)}
+                startEdit={() => setIsEditId(x.id)}
+                isEditing={isEditId === x.id}
+                myId={userId}
+              />
+            ))
+          )}
+        </ul>
+        <div ref={fetchMoreElement} />
+      </>
     </>
   )
 }
