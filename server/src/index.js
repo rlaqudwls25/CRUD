@@ -26,6 +26,7 @@ server.applyMiddleware({
   cors: {
     origin: ['http://localhost:3000', 'https://studio.apollographql.com'],
     credentials: true,
+    // credentials를 true로 설정하면 CORS정책에 의해 모든 출처를 허용하는 *로 지정할 수 없다.
   },
 })
 
