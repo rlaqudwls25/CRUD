@@ -28,6 +28,10 @@ const App = ({ Component, pageProps }) => {
   )
 }
 
+/**
+ * getInitialProps을 이용하여 데이터를 미리 받아오고, 렌더링 할 당시에는 이미 값이
+ * 있기 때문에 error가 나지 않고 초기 실행이 빠르다
+ */
 App.getInitialProps = async ({ ctx, Component }) => {
   const pageProps = await Component.getInitialProps?.(ctx)
   return { pageProps }

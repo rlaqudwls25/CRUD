@@ -41,4 +41,6 @@ export const findMsgIndex = (pages: { messages: Message[] }[], id: number) => {
 //   return res.data
 // }
 
+// axios.get()
+
 // export default fetcher

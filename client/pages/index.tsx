@@ -10,6 +10,10 @@ const Home = ({ smsgs }: { smsgs: Message[] }) => {
 
 export default Home
 
+/**
+ * seo에 필요한 페이지면 getServerSideProps 사용 다만 남발하면 서버가 모든 요청을 계산하고
+ * 캐시가 힘들기에 비효율적이다/
+ */
 export const getServerSideProps = async () => {
   const { messages: smsgs } = await fetcher(GET_MESSAGES)
   // const { users } = await fetcher(GET_USERS)
