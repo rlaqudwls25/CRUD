@@ -6,6 +6,7 @@
   "dependencies": {
     "@next/bundle-analyzer": "^13.0.3",
     "@tanstack/react-query": "^4.0.10",
+    "@tanstack/react-query-devtools": "^4.16.1",
     "axios": "^0.21.1",
     "graphql": "^16.5.0",
     "graphql-request": "^4.3.0",
@@ -26,7 +27,8 @@
     "webpack": "^5.51.1"
   },
   "scripts": {
-    "start": "next",
-    "build": "ANALYZE=true NODE_ENV=production next build"
+    "start": "next start",
+    "build": "next build",
+    "vercel-deploy": "next build && next export"
   }
 }

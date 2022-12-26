@@ -3,6 +3,7 @@ import { Message, MsgQueryData } from '../types/types'
 import { useRouter } from 'next/router'
 import { fetcher, QueryKeys, findMsgIndex } from '../fetcher'
 import {
+  QueryClient,
   useInfiniteQuery,
   useMutation,
   useQuery,
@@ -30,16 +31,17 @@ const MsgList = ({ smsgs }: { smsgs: Message[] }) => {
   } = useRouter()
   const client = useQueryClient()
 
-  const { data, error, isError, hasNextPage, fetchNextPage, isLoading } =
-    useInfiniteQuery(
-      [QueryKeys.MESSAGES],
-      ({ pageParam = '' }) => fetcher(GET_MESSAGES, { cursor: pageParam }),
-      {
-        getNextPageParam: (res) => {
-          return res.messages?.[res.messages.length - 1]?.id
-        },
-      }
-    )
+  const { data, hasNextPage, fetchNextPage, isLoading } = useInfiniteQuery(
+    [QueryKeys.MESSAGES],
+    ({ pageParam = '' }) => fetcher(GET_MESSAGES, { cursor: pageParam }),
+    {
+      getNextPageParam: (res) => {
+        return res.messages?.[res.messages.length - 1]?.id
+      },
+    }
+  )
+
+  // const data2 = QueryClient.
 
   useEffect(() => {
     if (!data?.pages) return
